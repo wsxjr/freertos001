@@ -20,9 +20,6 @@ MDK-ARM/freertos001/
 *.bak
 *.tmp
 
-# Doxygen generated output
-docs/doxygen/
-
 # Logs
 *.log
 JLinkLog.txt
@@ -38,3 +35,4 @@ desktop.ini
 build/
 Debug/
 Release/
+

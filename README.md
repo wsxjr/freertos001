@@ -188,7 +188,6 @@ freertos001/
 │  ├─ startup_stm32f407xx.s // 启动文件
 │  └─ RTE/                  // Keil 组件配置
 ├─ freertos001.ioc          // STM32CubeMX 配置
-├─ Doxyfile                 // Doxygen 配置
 ├─ README.md                // 本文件
 └─ .gitignore               // Git 忽略规则
 ```
@@ -359,4 +358,6 @@ ICM20602 是六轴 IMU，没有磁力计，Yaw 只能通过陀螺积分得到，
 
 GitHub：https://github.com/wsxjr/freertos001
 
-仓库包含完整源码、Keil5 工程、STM32CubeMX 配置文件、README 和 Doxyfile。
+仓库包含完整源码、Keil5 工程、STM32CubeMX 配置文件和 README。
+
+
