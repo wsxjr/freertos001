@@ -318,75 +318,45 @@ OLED 驱动使用 1KB RAM 显存，先写显存，再按页刷新到屏幕。
 4. 上电后保持板子静止约 1 秒，等待 IMU 校准；
 5. 校准完成后观察 OLED 上的 Roll/Pitch/Yaw。
 
-## 11. 遇到的问题与解决方法
+## 11. 调试中的问题与处理
 
-### 11.1 `Angles` 未定义
+### 11.1 AngleQ 元素类型
 
-最初 `freertos.c` 中直接使用 `Angles`，但类型没有声明。解决方法是新增 `app.h`，在其中定义 `Angles` 结构体，并在 `freertos.c` 中包含该头文件。
+`freertos.c` 创建 `AngleQ` 时需要知道队列元素类型，因此在 `app.h` 中定义 `Angles` 结构体，`freertos.c` 包含该头文件后使用 `sizeof(Angles)` 创建队列。
 
-### 11.2 串口 DMA 循环模式导致回传累积
+### 11.2 UART DMA 模式
 
-最初 RX DMA 使用 Circular 模式，IDLE 回调拿到的长度是相对缓冲区起始的累计长度，容易把旧数据一起回传。解决方法是把 RX/TX DMA 都改成 Normal 模式，并在每次 IDLE/TC 回调后重新调用 `HAL_UARTEx_ReceiveToIdle_DMA()`。
+USART1 的 RX/TX DMA 使用 Normal 模式。每帧结束后在 IDLE/TC 回调中重新调用 `HAL_UARTEx_ReceiveToIdle_DMA()`，避免 Circular 模式下回调长度累计，导致旧数据被重复回传。
 
-### 11.3 从 MPU6050 换成 ICM20602
+### 11.3 ICM20602 SPI 配置
 
-MPU6050 使用 I2C，ICM20602 使用 SPI，因此需要：
+ICM20602 使用 SPI1，接线为 PA4=CS、PA5=SCK、PA6=MISO、PA7=MOSI。工程中启用了 `HAL_SPI_MODULE_ENABLED`，并把 `stm32f4xx_hal_spi.c` 加入 Keil 工程。CS 由软件控制，空闲保持高电平。
 
-- 在 CubeMX 中增加 SPI1；
-- 配置 PA4~PA7；
-- 启用 `HAL_SPI_MODULE_ENABLED`；
-- 把 `stm32f4xx_hal_spi.c` 加入 Keil 工程；
-- 将 IMU 驱动替换为 `icm20602.c`。
+### 11.4 ICM20602 读不到 WHO_AM_I
 
-### 11.4 ICM20602 读不到 ID
+ICM20602 对 SPI 模式和速率比较敏感。驱动会依次尝试 Mode 0/Mode 3 和不同预分频，并读取 `WHO_AM_I` 进行判断。如果读不到，重点检查：
 
-ICM20602 对 SPI 模式和速率比较敏感。驱动中增加了 Mode 0/Mode 3 和不同预分频的自动扫描，并加入 WHO_AM_I 诊断。检查接线时重点确认 `CS/SCK/MISO/MOSI` 没有接反，模块已切到 SPI 模式。
+- 模块是否切到 SPI 模式；
+- CS、SCK、MISO、MOSI 是否接反；
+- 模块是否共地、是否 3.3V 供电。
 
 ### 11.5 OLED 不显示
 
-常见原因：
+常见原因包括：
 
 - I2C 地址不是 0x3C；
 - SCL/SDA 接反；
 - 模块没有共地；
 - I2C2 没有配置成 400kHz。
 
-驱动会自动尝试 0x78 和 0x7A 两个 8 位地址。
+OLED 驱动会自动尝试 0x78 和 0x7A 两个 8 位地址。
 
 ### 11.6 Yaw 漂移
 
-ICM20602 是六轴 IMU，没有磁力计，Yaw 只能靠陀螺积分，长时间会漂移。解决方法是增加静止检测、Yaw 积分死区和陀螺零偏跟踪，但不能完全消除漂移。
+ICM20602 是六轴 IMU，没有磁力计，Yaw 只能通过陀螺积分得到，长时间会缓慢漂移。工程中增加了静止检测、Yaw 积分死区和陀螺零偏跟踪，用于减小静止漂移，但不能完全消除。
 
-### 11.7 工程文件结构混乱
+## 12. 仓库地址
 
-最初应用代码集中在 `wxjsj.c`，可读性差。后来拆分为：
+GitHub：https://github.com/wsxjr/freertos001
 
-- `app_uart.c`
-- `app_imu.c`
-- `app_oled.c`
-- `oled.c`
-
-任务入口放在 `freertos.c`，驱动和算法独立成文件。
-
-### 11.8 Keil 中新增文件不参与编译
-
-新增 `.c` 文件后，需要确认它已经加入 Keil 工程的文件列表，否则链接时会提示函数未定义。
-
-## 12. Git 仓库链接
-
-提交前请将下面链接替换为实际仓库地址：
-
-- GitHub：https://github.com/wsxjr/freertos001
-- Gitee：暂未使用
-
-仓库中已包含：
-
-- 完整源码：`Core/`、`Drivers/`、`Middlewares/`
-- Keil5 工程：`MDK-ARM/freertos001.uvprojx`
-- CubeMX 配置：`freertos001.ioc`
-- README：`README.md`
-- `.gitignore`
-- `Doxyfile`
-
-`.gitignore` 已排除 Keil 编译中间文件、`.uvguix` 用户布局文件、日志和 Doxygen 生成目录。
-
+仓库包含完整源码、Keil5 工程、STM32CubeMX 配置文件、README 和 Doxyfile。
