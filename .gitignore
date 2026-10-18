@@ -1,0 +1,40 @@
+# Keil MDK build output
+MDK-ARM/freertos001/
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.elf
+*.map
+*.lst
+*.lnp
+*.sct
+*.dep
+*.build_log.htm
+*.htm
+
+# Keil user-specific files
+*.uvguix.*
+*.bak
+*.tmp
+
+# Doxygen generated output
+docs/doxygen/
+
+# Logs
+*.log
+JLinkLog.txt
+
+# OS/editor files
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Build directories
+build/
+Debug/
+Release/
