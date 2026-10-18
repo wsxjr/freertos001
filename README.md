@@ -1,6 +1,6 @@
 # STM32F407 + FreeRTOS ICM20602 姿态显示系统
 
-> Git 仓库链接：提交前请替换为实际的 GitHub / Gitee 地址。
+> Git 仓库链接：https://github.com/wsxjr/freertos001
 
 ## 1. 项目简介
 
@@ -376,8 +376,8 @@ ICM20602 是六轴 IMU，没有磁力计，Yaw 只能靠陀螺积分，长时间
 
 提交前请将下面链接替换为实际仓库地址：
 
-- GitHub：`https://github.com/<your-username>/<repository-name>`
-- Gitee：`https://gitee.com/<your-username>/<repository-name>`
+- GitHub：https://github.com/wsxjr/freertos001
+- Gitee：暂未使用
 
 仓库中已包含：
 
@@ -389,3 +389,4 @@ ICM20602 是六轴 IMU，没有磁力计，Yaw 只能靠陀螺积分，长时间
 - `Doxyfile`
 
 `.gitignore` 已排除 Keil 编译中间文件、`.uvguix` 用户布局文件、日志和 Doxygen 生成目录。
+
